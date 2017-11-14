@@ -1,17 +1,24 @@
 body {
-    background-color: #FFFFFF;
+    background-color: lightblue;
     font-family: Verdana,Arial,Helvetica,sans-serif;
     font-size: small;
     color: #000000;
 }
 
 #dropbox {
-    border: 2px dashed #000000;
-    padding: 20px;
+  height: 200px;
+  border-width: 2px;
+  margin-bottom: 20px;
+  color: #ccc;
+  border-style: dashed;
+  border-color: #ccc;
+  line-height: 200px;
+  text-align: center
 }
 
 #dropbox.active {
-    border: 4px dashed #FF0000;
+  color: #222;
+  border-color: #222;
 }
 
 .progress-trough {
@@ -26,3 +33,4 @@ body {
     height: 100%;
     background-color: #0099FF;
 }
+

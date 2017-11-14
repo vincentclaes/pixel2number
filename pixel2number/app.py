@@ -1,8 +1,14 @@
-from flask import Flask, request, redirect, url_for, render_template
-import os
-import json
 import glob
+import json
+import os
+import zipfile
 from uuid import uuid4
+import shutil
+from flask import Flask, request, redirect, url_for, render_template, send_file
+
+from pixel2number import image_converter
+
+dir_path = os.path.dirname(os.path.realpath(__file__))
 
 app = Flask(__name__)
 
@@ -26,7 +32,7 @@ def upload():
         is_ajax = True
 
     # Target folder for these uploads.
-    target = "uploadr/static/uploads/{}".format(upload_key)
+    target = "pixel2number/static/uploads/{}".format(upload_key)
     try:
         os.mkdir(target)
     except:
@@ -57,19 +63,47 @@ def upload_complete(uuid):
     """The location we send them to at the end of the upload."""
 
     # Get their files.
-    root = "uploadr/static/uploads/{}".format(uuid)
+    root = "pixel2number/static/uploads/{}".format(uuid)
     if not os.path.isdir(root):
         return "Error: UUID not found!"
 
     files = []
     for file in glob.glob("{}/*.*".format(root)):
         fname = file.split(os.sep)[-1]
+        image_converter.convert(file)
         files.append(fname)
 
     return render_template("files.html",
-        uuid=uuid,
-        files=files,
-    )
+                           uuid=uuid,
+                           files=files,
+                           )
+
+
+def cleanup(func):
+    def wrapped(uuid):
+        response = func(uuid)
+        for root, dirs, files in os.walk('pixel2number/static/uploads'):
+            for dir_ in dirs:
+                if dir_ != uuid:
+                    shutil.rmtree(os.path.join(root, dir_))
+        return response
+
+    return wrapped
+
+
+@app.route('/return-files/<uuid>')
+@cleanup
+def return_files(uuid):
+    root = "pixel2number/static/uploads/{}".format(uuid)
+    # create zip file from all files in uuid folder
+    local_zipfile = os.path.join(root, uuid + '.zip')
+    zip = zipfile.ZipFile(local_zipfile, "w", zipfile.ZIP_DEFLATED)
+    for individualFile in os.listdir(root):
+        if '.zip' not in individualFile:
+            zip.write(os.path.join(root, individualFile))
+    zip.close()
+    return send_file('static/uploads/{}/{}.zip'.format(uuid, uuid), attachment_filename='pixel2number.zip',
+                     as_attachment=True)
 
 
 def ajax_response(status, msg):
