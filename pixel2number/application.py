@@ -10,16 +10,16 @@ from pixel2number import image_converter
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
-app = Flask(__name__)
+application = Flask(__name__)
 
 
-@app.route("/")
-@app.route("/index")
+@application.route("/")
+@application.route("/index")
 def index():
     return render_template("index.html")
 
 
-@app.route("/upload", methods=["POST"])
+@application.route("/upload", methods=["POST"])
 def upload():
     """Handle the upload of a file."""
     form = request.form
@@ -59,7 +59,7 @@ def upload():
         return redirect(url_for("upload_complete", uuid=upload_key))
 
 
-@app.route("/files/<uuid>")
+@application.route("/files/<uuid>")
 def upload_complete(uuid):
     """The location we send them to at the end of the upload."""
 
@@ -92,7 +92,7 @@ def cleanup(func):
     return wrapped
 
 
-@app.route('/return-files/<uuid>')
+@application.route('/return-files/<uuid>')
 @cleanup
 def return_files(uuid):
     root = "pixel2number/static/uploads/{}".format(uuid)
