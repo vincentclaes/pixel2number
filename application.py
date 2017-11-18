@@ -15,6 +15,7 @@ parser.add_argument(
 )
 args = parser.parse_args()
 flask_options = dict(
+    host='0.0.0.0',
     debug=True,
     port=args.port,
     threaded=True,
